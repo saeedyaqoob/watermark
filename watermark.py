@@ -3,62 +3,68 @@ from tkinter import filedialog
 from PIL import ImageTk, Image, ImageDraw, ImageFont
 from copy import copy
 
-global img, wmk, base_image, watermark_image, transparent, final, count, text, window
-count = 1
+IMG = None
+WMK = None
+BASE_IMAGE = None
+WATERMARK_IMAGE = None
+TRANSPARENT = None
+FINAL = None
+TEXT = None
+COUNT = 1
 
 
 # Uploading the main/base jpeg image and displaying it in the canvas
 def upload_image(event=None):
-    global img, base_image
+    global IMG, BASE_IMAGE
     filename = filedialog.askopenfilename(filetypes=[("JPEG files", ".jpg .jpeg .JPG .JPEG")])
-    base_image = Image.open(filename)
-    image = base_image.resize((100, 100), Image.ANTIALIAS)
-    img = ImageTk.PhotoImage(image)
-    canvas_image.create_image(50, 50, image=img)
+    BASE_IMAGE = Image.open(filename)
+    image = BASE_IMAGE.resize((100, 100), Image.ANTIALIAS)
+    IMG = ImageTk.PhotoImage(image)
+    canvas_image.create_image(50, 50, image=IMG)
 
 
 # Uploading the watermark png image and displaying it in the canvas
 def upload_watermark(event=None):
-    global wmk, watermark_image
+    global WMK, WATERMARK_IMAGE
     filename = filedialog.askopenfilename(filetypes=[("PNG files", ".png .PNG")])
-    watermark_image = Image.open(filename)
-    image = watermark_image.resize((100, 100), Image.ANTIALIAS)
-    wmk = ImageTk.PhotoImage(image)
-    canvas_watermark.create_image(50, 50, image=wmk)
+    WATERMARK_IMAGE = Image.open(filename)
+    image = WATERMARK_IMAGE.resize((100, 100), Image.ANTIALIAS)
+    WMK = ImageTk.PhotoImage(image)
+    canvas_watermark.create_image(50, 50, image=WMK)
 
 
 # To save the output/final image
 def save():
-    global transparent, count, window
+    global TRANSPARENT, COUNT, window
     filename = filedialog.asksaveasfilename(filetypes=("JPEG files", ".jpeg .JPEG"))
-    transparent.save(filename + '.jpeg')
-    count += 1
+    TRANSPARENT.save(filename + '.jpeg')
+    COUNT += 1
     # Exit program after image is saved
     window.destroy()
 
 
 # Pasting the watermark image over the base image and displaying a preview in the canvas
 def paste_watermark(event=None):
-    global base_image, watermark_image, transparent, final
+    global BASE_IMAGE, WATERMARK_IMAGE, TRANSPARENT, FINAL
     margin = 20
-    width_b, height_b = base_image.size
-    width_w, height_w = watermark_image.size
-    watermark_image = watermark_image.resize((int(width_b*0.2), int(height_b*0.2)), Image.ANTIALIAS)
-    transparent = Image.new('RGBA', (width_b, height_b), (0, 0, 0, 0))
-    transparent.paste(base_image, (0, 0))
-    transparent.paste(watermark_image, (width_b-width_w-margin, height_b-height_w-margin), mask=watermark_image)
-    transparent = transparent.convert('RGB')
-    image = transparent.resize((300, 300), Image.ANTIALIAS)
-    final = ImageTk.PhotoImage(image)
-    canvas_show.create_image(150, 150, image=final)
+    width_b, height_b = BASE_IMAGE.size
+    width_w, height_w = WATERMARK_IMAGE.size
+    WATERMARK_IMAGE = WATERMARK_IMAGE.resize((int(width_b * 0.2), int(height_b * 0.2)), Image.ANTIALIAS)
+    TRANSPARENT = Image.new('RGBA', (width_b, height_b), (0, 0, 0, 0))
+    TRANSPARENT.paste(BASE_IMAGE, (0, 0))
+    TRANSPARENT.paste(WATERMARK_IMAGE, (width_b - width_w - margin, height_b - height_w - margin), mask=WATERMARK_IMAGE)
+    TRANSPARENT = TRANSPARENT.convert('RGB')
+    image = TRANSPARENT.resize((300, 300), Image.ANTIALIAS)
+    FINAL = ImageTk.PhotoImage(image)
+    canvas_show.create_image(150, 150, image=FINAL)
 
 
 # Pasting the text watermark over the base image and displaying a preview in the canvas
 def write_watermark(event=None):
-    global base_image, transparent, final, text
-    text = entry_watermark.get()
+    global BASE_IMAGE, TRANSPARENT, FINAL, TEXT
+    TEXT = entry_watermark.get()
     margin = 20
-    new_image = copy(base_image)
+    new_image = copy(BASE_IMAGE)
     width_b, height_b = new_image.size
     drawing = ImageDraw.Draw(new_image)
     black = (3, 8, 12)
@@ -67,19 +73,19 @@ def write_watermark(event=None):
     # portion of image width you want text width to be
     img_fraction = 0.25
     font = ImageFont.truetype('FreeMono.ttf', font_size)
-    while font.getsize(text)[0] < img_fraction * new_image.size[0]:
+    while font.getsize(TEXT)[0] < img_fraction * new_image.size[0]:
         # iterate until the text size is just larger than the criteria
         font_size += 1
         font = ImageFont.truetype('FreeMono.ttf', font_size)
     # optionally de-increment to be sure it is less than criteria
     font_size -= 1
     font = ImageFont.truetype('FreeMono.ttf', font_size)
-    width_t, height_t = drawing.textsize(text, font)
-    drawing.text((width_b-width_t-margin, height_b-height_t-margin), text, fill=black, font=font)
+    width_t, height_t = drawing.textsize(TEXT, font)
+    drawing.TEXT((width_b - width_t - margin, height_b - height_t - margin), TEXT, fill=black, font=font)
     image = new_image.resize((300, 300), Image.ANTIALIAS)
-    final = ImageTk.PhotoImage(image)
-    canvas_show.create_image(150, 150, image=final)
-    transparent = new_image
+    FINAL = ImageTk.PhotoImage(image)
+    canvas_show.create_image(150, 150, image=FINAL)
+    TRANSPARENT = new_image
 
 
 # Main Program
